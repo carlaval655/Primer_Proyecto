@@ -47,15 +47,15 @@ public class Banco {
         }
         return null;
     }
-    public String buscarNombreCliente (String id){
-        String nombre = null;
+    public Cliente buscarCliente (String id){
+        Cliente cliente = null;
         for (int i = 0; i<clientes.size(); i++){
             Cliente cli = clientes.get(i);
-            if (cli.getIdCliente().equals(id)){
-                nombre = cli.getNombre();
+            if(cli.getIdCliente().equals(id)){
+                cliente = cli;
                 break;
             }
         }
-        return nombre;
+        return cliente;
     }
 }

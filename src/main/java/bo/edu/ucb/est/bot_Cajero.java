@@ -30,7 +30,7 @@ public class bot_Cajero extends TelegramLongPollingBot{
     private int nroCuenta = 300;
     @Override
     public String getBotToken() {
-        return "2028623412:AAEcJwLSBJv07HR6XgiPP92Y5rEU98v5zd4"; //To change body of generated methods, choose Tools | Templates.
+        return ""; //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
@@ -57,7 +57,7 @@ public class bot_Cajero extends TelegramLongPollingBot{
             String sinCuenta = "Usted no tiene cuentas, cree una primero";
             String seleccionMoneda = "Seleccione la moneda:\n\t1. Dolares\n\t2. Bolivianos";
             String seleccionTipoCuenta = "Seleccione el tipo de cuenta:\n\t1. Caja de Ahorros\n\t2. Cuenta corriente";
-            String creacionCuenta1 = "Se le ha creado una cuenta tipo ";
+            String creacionCuenta = "Se le ha creado una ";
             String mensajeError = "Hubo un error.";
             String mensajeUsuario = null;
             switch (estado){
@@ -96,19 +96,19 @@ public class bot_Cajero extends TelegramLongPollingBot{
                         }
                     }
                     catch(Exception ex){
-                        mostrarMensaje(mensajeError, userId);
-                        estadoUsuario.put(userId,0);
+                        mostrarMensaje(pedirPin, userId);
+                        estadoUsuario.put(userId,2);
                     }
                      break;
                 case 3: // Ya se registro al usuario y se le pide que introduzca su pin
                      mensajeUsuario = update.getMessage().getText();
                      try {
-                        mostrarMensaje(bienvenida+banco.buscarNombreCliente(userId), userId);
+                        mostrarMensaje(bienvenida+banco.buscarCliente(userId).getNombre(), userId);
                         mostrarMensaje(pedirPinIngreso,userId);
                         estadoUsuario.put(userId,4);
                     }
                     catch(Exception ex){
-                        mostrarMensaje(mensajeError, userId);
+                        estadoUsuario.put(userId,3);
                     }
                      break;
                 case 4: // se corrobora el pin que el cliente ingreso
@@ -117,7 +117,7 @@ public class bot_Cajero extends TelegramLongPollingBot{
                         Cliente cli = banco.buscarClientePorCodigo(userId, mensajeUsuario);
                         if (cli==null){
                             mostrarMensaje(pinIncorrecto,userId);
-                            mostrarMensaje(bienvenida+banco.buscarNombreCliente(userId), userId);
+                            mostrarMensaje(bienvenida+banco.buscarCliente(userId).getNombre(), userId);
                             mostrarMensaje(pedirPinIngreso,userId);
                             estadoUsuario.put(userId,4);
                         }
@@ -130,15 +130,18 @@ public class bot_Cajero extends TelegramLongPollingBot{
                     }
                     catch(Exception ex){
                         mostrarMensaje(mensajeError, userId);
+                        mostrarMensaje(pedirPinIngreso,userId);
+                        estadoUsuario.put(userId,4);
                     }
                      break;
                 case 5: // El cliente ingreso al sistema pero no tiene ninguna cuenta
                      mensajeUsuario = update.getMessage().getText();
                      try {
                         int opcion = Integer.parseInt(mensajeUsuario);
-                        if (opcion!=4){
+                        if(clienteCuentaActual.get(userId)==null){
+                            if (opcion!=4){
                             mostrarMensaje(sinCuenta,userId);
-                            mostrarMensaje(bienvenida+banco.buscarNombreCliente(userId), userId);
+                            mostrarMensaje(bienvenida+banco.buscarCliente(userId).getNombre(), userId);
                             mostrarMensaje(pedirPinIngreso,userId);
                             estadoUsuario.put(userId,4);
                         }
@@ -146,8 +149,12 @@ public class bot_Cajero extends TelegramLongPollingBot{
                             Cuenta cuenta = new Cuenta(String.valueOf(nroCuenta));//Se creo la cuenta pero aun no se la agrego a la lista de cuentas del cliente debido a que falta completar informacion de la misma.
                             clienteCuentaActual.put(userId,cuenta);
                             //clienteUsuario.get(userId).agregarCuenta(cuenta);
-                            mostrarMensaje(userId,seleccionMoneda);
+                            mostrarMensaje(seleccionMoneda,userId);
                             estadoUsuario.put(userId, 6);
+                        }
+                        }
+                        else {
+                            if(opcion)
                         }
                     }
                     catch(Exception ex){
@@ -161,17 +168,53 @@ public class bot_Cajero extends TelegramLongPollingBot{
                      mensajeUsuario = update.getMessage().getText();
                      try {
                         int opcion = Integer.parseInt(mensajeUsuario);
-                        if (opcion!=4){
-                            mostrarMensaje(sinCuenta,userId);
-                            mostrarMensaje(bienvenida+banco.buscarNombreCliente(userId), userId);
-                            mostrarMensaje(pedirPinIngreso,userId);
-                            estadoUsuario.put(userId,4);
+                        if (opcion ==1 || opcion==2){
+                            if (opcion == 1){
+                                clienteCuentaActual.get(userId).setMoneda("Dolares");
+                                mostrarMensaje(seleccionTipoCuenta,userId);
+                                estadoUsuario.put(userId,7);
+                            }
+                            else{
+                                clienteCuentaActual.get(userId).setMoneda("Bolivianos");
+                                mostrarMensaje(seleccionTipoCuenta,userId);
+                                estadoUsuario.put(userId,7);
+                            }
                         }
                         else {
-                            Cuenta cuenta = new Cuenta(String.valueOf(nroCuenta));//Se creo la cuenta pero aun no se la agrego a la lista de cuentas del cliente debido a que falta completar informacion de la misma.
-                            clienteCuentaActual.put(userId,cuenta);
-                            //clienteUsuario.get(userId).agregarCuenta(cuenta);
-                            estadoUsuario.put(userId, 6);
+                            mostrarMensaje(mensajeError, userId);
+                            mostrarMensaje("Bienvenido",userId);
+                            mostrarMensaje(menuPrincipal,userId);
+                            estadoUsuario.put(userId,5);
+                        }
+                    }
+                    catch(Exception ex){
+                        mostrarMensaje(mensajeError, userId);
+                        mostrarMensaje("Bienvenido",userId);
+                        mostrarMensaje(menuPrincipal,userId);
+                        estadoUsuario.put(userId,5);
+                    }
+                     break;
+                case 7: // El cliente debio ingresar el tipo de cuenta que desea crear
+                     mensajeUsuario = update.getMessage().getText();
+                     try {
+                         Cuenta cuenta = clienteCuentaActual.get(userId);
+                        int opcion = Integer.parseInt(mensajeUsuario);
+                        if (opcion ==1 || opcion==2){
+                            if (opcion == 1){
+                                cuenta.setTipo("Caja de Ahorros");
+                            }
+                            else{
+                                cuenta.setTipo("Cuenta Corriente");
+                            }
+                            banco.buscarCliente(userId).agregarCuenta(clienteCuentaActual.get(userId));
+                            mostrarMensaje(creacionCuenta+cuenta.getTipo()+" en "+cuenta.getMoneda()+" con saldo cero, cuyo numero de cuenta es "+cuenta.getNroCuenta(),userId);
+                            estadoUsuario.put(userId,3);
+                        }
+                        else {
+                            mostrarMensaje(mensajeError, userId);
+                            mostrarMensaje("Bienvenido",userId);
+                            mostrarMensaje(menuPrincipal,userId);
+                            estadoUsuario.put(userId,5);
                         }
                     }
                     catch(Exception ex){
