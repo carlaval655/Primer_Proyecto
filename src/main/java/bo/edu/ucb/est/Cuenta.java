@@ -11,11 +11,11 @@ public class Cuenta {
     private String tipo;
     private double saldo;
 
-    public Cuenta(String nroCuenta, String moneda, String tipo, double saldoInicial) {
+    public Cuenta(String nroCuenta) {
     	this.nroCuenta = nroCuenta;
-        this.moneda = moneda;
-        this.tipo = tipo;
-        this.saldo = saldoInicial;
+        this.moneda = null;
+        this.tipo = null;
+        this.saldo = 0;
     }
 
     public boolean retirar(double monto) {
