@@ -58,4 +58,7 @@ public class Banco {
         }
         return cliente;
     }
+    public int listSize(String userId){
+        return buscarCliente(userId).listSize();
+    }
 }

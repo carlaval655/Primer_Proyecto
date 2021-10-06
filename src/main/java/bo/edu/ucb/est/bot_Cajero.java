@@ -22,11 +22,12 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
  * @author Windows
  */
 public class bot_Cajero extends TelegramLongPollingBot{
+    
     private Map<String,Cuenta> clienteCuentaActual = new HashMap<String,Cuenta>();
     private Map<String,Cliente> clienteUsuario = new HashMap<String,Cliente>();
     private Map<String,Integer> clienteEstado = new HashMap<String,Integer>();
     private Map estadoUsuario = new HashMap();
-    private Banco banco = new Banco("bisa");
+    private Banco banco = new Banco("BISA");
     private int nroCuenta = 300;
     @Override
     public String getBotToken() {
@@ -43,8 +44,9 @@ public class bot_Cajero extends TelegramLongPollingBot{
             estadoUsuario.put(userId,estado);
         }
         System.out.println(update.getMessage().toString());
+        int seleccionCuenta=0;
         if(update.hasMessage()) {
-            String noCliente1 = "Bienvenido al Banco " + banco.getNombre();
+            String noCliente1 = "Bienvenido al banco "+banco.getNombre();
             String noCliente2 = "He notado que aun no eres cliente.";
             String pedirNombre = "¿Cuál es tu nombre completo?";
             String pedirPin = "Por favor elige un PIN de seguridad, este te sera requerido cada que ingreses al sistema.";
@@ -138,12 +140,19 @@ public class bot_Cajero extends TelegramLongPollingBot{
                      mensajeUsuario = update.getMessage().getText();
                      try {
                         int opcion = Integer.parseInt(mensajeUsuario);
-                        if(clienteCuentaActual.get(userId)==null){
-                            if (opcion!=4){
+                        if(clienteCuentaActual.get(userId)==null){ //significa que el cliente aun no tiene ninguna cuenta por lo tanto la unica opcion a la que puede acceder es a la 4
+                            if (opcion==1 || opcion ==2 || opcion==3 || opcion==5){
+                                if(opcion==1 || opcion ==2 || opcion==3){
                             mostrarMensaje(sinCuenta,userId);
                             mostrarMensaje(bienvenida+banco.buscarCliente(userId).getNombre(), userId);
                             mostrarMensaje(pedirPinIngreso,userId);
                             estadoUsuario.put(userId,4);
+                                }
+                                else{
+                                    mostrarMensaje(bienvenida+banco.buscarCliente(userId).getNombre(), userId);
+                                    mostrarMensaje(pedirPinIngreso,userId);
+                                    estadoUsuario.put(userId,4);
+                                }
                         }
                         else {
                             Cuenta cuenta = new Cuenta(String.valueOf(nroCuenta));//Se creo la cuenta pero aun no se la agrego a la lista de cuentas del cliente debido a que falta completar informacion de la misma.
@@ -153,8 +162,38 @@ public class bot_Cajero extends TelegramLongPollingBot{
                             estadoUsuario.put(userId, 6);
                         }
                         }
-                        else {
-                            if(opcion)
+                        else {//El cliente tiene al menos una cuenta
+                            switch(opcion){
+                            case 1:
+                                estadoUsuario.put(userId,9);//Ver saldo
+                                mostrarMensaje(banco.buscarCliente(userId).mostrarCuentas(),userId);
+                                break;
+                            case 2:
+                                estadoUsuario.put(userId,10);// Retirar dinero
+                                mostrarMensaje(banco.buscarCliente(userId).mostrarCuentas(),userId);
+                                break;
+                            case 3:
+                                estadoUsuario.put(userId,11);//Depositar dinero
+                                mostrarMensaje(banco.buscarCliente(userId).mostrarCuentas(),userId);
+                                break;
+                            case 4:
+                                Cuenta cuenta = new Cuenta(String.valueOf(nroCuenta));//Se creo la cuenta pero aun no se la agrego a la lista de cuentas del cliente debido a que falta completar informacion de la misma.
+                            clienteCuentaActual.put(userId,cuenta);
+                            mostrarMensaje(seleccionMoneda,userId);
+                            estadoUsuario.put(userId, 6);
+                                break;
+                            case 5:
+                                //Se le vuelve a pedir que introduzca el pin
+                                mostrarMensaje(bienvenida+banco.buscarCliente(userId).getNombre(), userId);
+                                    mostrarMensaje(pedirPinIngreso,userId);
+                                    estadoUsuario.put(userId,4);
+                                break;
+                            default:
+                                mostrarMensaje(mensajeError,userId);
+                                estadoUsuario.put(userId,3);
+                                break;
+                        }
+                        //mostrarMensaje(banco.buscarCliente(userId).mostrarCuentas(),userId);
                         }
                     }
                     catch(Exception ex){
@@ -224,9 +263,178 @@ public class bot_Cajero extends TelegramLongPollingBot{
                         estadoUsuario.put(userId,5);
                     }
                      break;
+                     /*case 8: // El cliente selecciono una opcion
+                     mensajeUsuario = update.getMessage().getText();
+                     int opcion = Integer.parseInt(mensajeUsuario);
+                     try {
+                        switch(opcion){
+                            case 1:
+                                estadoUsuario.put(userId,9);//Ver saldo
+                                
+                                break;
+                            case 2:
+                                estadoUsuario.put(userId,10);// Retirar dinero
+                                //mostrarMensaje(banco.buscarCliente(userId).mostrarCuentas(),userId);
+                                break;
+                            case 3:
+                                estadoUsuario.put(userId,11);//Retirar dinero
+                                //mostrarMensaje(banco.buscarCliente(userId).mostrarCuentas(),userId);
+                                break;
+                            case 4:
+                                estadoUsuario.put(userId,3);//Se le vuelve a pedir que introduzca el pin
+                                break;
+                            default:
+                                mostrarMensaje(mensajeError,userId);
+                                estadoUsuario.put(userId,3);
+                                break;
+                        }
+                        mostrarMensaje(banco.buscarCliente(userId).mostrarCuentas(),userId);
+                    }
+                    catch(Exception ex){
+                        mostrarMensaje(mensajeError, userId);
+                        mostrarMensaje("Bienvenido",userId);
+                        mostrarMensaje(menuPrincipal,userId);
+                        estadoUsuario.put(userId,5);
+                    }
+                     break;*/
+                     /*
+                     caso 9 >>> Ver saldo
+                     caso 10 >>> Retirar dinero
+                     caso 11 >>> Depositar dinero
+                     caso 12 >>> Validar retiro
+                     caso 13 >>> Validar deposito
+                     */
+                    case 9://El usuario ya selecciono la cuenta. Selecciono la opcion de ver informacion de la cuenta
+                     mensajeUsuario = update.getMessage().getText();
+                     seleccionCuenta = Integer.parseInt(mensajeUsuario);
+                     try {
+                        if (seleccionCuenta>=1 && seleccionCuenta<=banco.buscarCliente(userId).getCuentas().size()){
+                            mostrarMensaje(banco.buscarCliente(userId).getCuentas().get(seleccionCuenta-1).mostrarInfoCuenta(),userId);
+                            mostrarMensaje(menuPrincipal,userId);
+                            estadoUsuario.put(userId,5);
+                        }
+                        else{
+                            mostrarMensaje(mensajeError, userId);
+                            estadoUsuario.put(userId,3);
+                        }
+                    }
+                    catch(Exception ex){
+                        mostrarMensaje(mensajeError, userId);
+                        mostrarMensaje("Bienvenido",userId);
+                        mostrarMensaje(menuPrincipal,userId);
+                        estadoUsuario.put(userId,5);
+                    }
+                     break;
+                    case 10://El usuario ya selecciono la cuenta y la accion a realizar. Selecciono la opcion de retirar dinero de la cuenta
+                     mensajeUsuario = update.getMessage().getText();
+                     seleccionCuenta = Integer.parseInt(mensajeUsuario);
+                     try {
+                        if (seleccionCuenta>=1 || seleccionCuenta<=banco.buscarCliente(userId).getCuentas().size()){
+                            Cuenta c = banco.buscarCliente(userId).getCuentas().get(seleccionCuenta-1);
+                            clienteCuentaActual.put(userId,c);
+                            
+                            mostrarMensaje("El saldo es esta cuenta es de "+c.getSaldo()+" "+c.getMoneda(),userId);
+                            mostrarMensaje("Introduzca el monto que desea retirar en "+c.getMoneda(),userId);
+                            estadoUsuario.put(userId,12);
+                        }
+                        else{
+                            mostrarMensaje(mensajeError, userId);
+                            estadoUsuario.put(userId,3);
+                        }
+                    }
+                    catch(Exception ex){
+                        mostrarMensaje(mensajeError, userId);
+                        mostrarMensaje("Bienvenido",userId);
+                        mostrarMensaje(menuPrincipal,userId);
+                        estadoUsuario.put(userId,5);
+                    }
+                     break; 
+                     case 11://El usuario ya selecciono la cuenta y la accion a realizar. Selecciono la opcion de depositar dinero en la cuenta
+                     mensajeUsuario = update.getMessage().getText();
+                     seleccionCuenta= Integer.parseInt(mensajeUsuario);
+                     
+                     try {
+                        if (seleccionCuenta>=1 || seleccionCuenta<=banco.buscarCliente(userId).getCuentas().size()){
+                            Cuenta cuentaDeposito = banco.buscarCliente(userId).getCuentas().get(seleccionCuenta-1);
+                            //System.out.println("cuenta deposito"+cuentaDeposito.mostrarInfoCuenta());
+                            clienteCuentaActual.put(userId, cuentaDeposito);
+                            mostrarMensaje(cuentaDeposito.mostrarInfoCuenta(),userId);
+                            mostrarMensaje("Introduzca el monto que desea depositar en "+cuentaDeposito.getMoneda(),userId);
+                            estadoUsuario.put(userId,13);
+                        }
+                        else{
+                            mostrarMensaje(mensajeError+"---", userId);
+                            estadoUsuario.put(userId,3);
+                        }
+                    }
+                    catch(Exception ex){
+                        mostrarMensaje(mensajeError, userId);
+                        mostrarMensaje("Bienvenido",userId);
+                        mostrarMensaje(menuPrincipal,userId);
+                        estadoUsuario.put(userId,5);
+                    }
+                     break; 
+                     case 12://Se debe validar el monto de retiro que el cliente ingreso
+                     mensajeUsuario = update.getMessage().getText();
+                     double montoRetirar= Double.parseDouble(mensajeUsuario);
+                     String nroCuentaActual = clienteCuentaActual.get(userId).getNroCuenta();
+                  
+                     try {
+                        //if (seleccionCuenta>=1 && seleccionCuenta<=banco.buscarCliente(userId).listSize()){
+                            if(banco.buscarCliente(userId).buscarCuenta(nroCuentaActual).retirar(montoRetirar)==true){
+                            mostrarMensaje("Se realizo el retiro con exito.",userId);
+                            mostrarMensaje(menuPrincipal,userId);
+                            estadoUsuario.put(userId,5);
+                        }
+                            else{
+                                Cuenta c = banco.buscarCliente(userId).buscarCuenta(nroCuentaActual);
+                                mostrarMensaje(mensajeError, userId);
+                                mostrarMensaje("Introduzca el monto que desea retirar en "+c.getMoneda(),userId);
+                                estadoUsuario.put(userId,13);
+                            }
+                        }
+                        //else{
+                          //  mostrarMensaje("No se pudo realizar el deposito", userId);
+                            //estadoUsuario.put(userId,3);
+                        //}
+                    //}
+                    catch(Exception ex){
+                        mostrarMensaje("Ocurrio una excepcion", userId);
+                        estadoUsuario.put(userId,3);
+                    }
+                     break;
+                     case 13://Se debe validar el monto que el cliente desea depositar
+                     mensajeUsuario = update.getMessage().getText();
+                     double montoDepositar= Double.parseDouble(mensajeUsuario);
+                     String nroCuenta = clienteCuentaActual.get(userId).getNroCuenta();
+                     try {
+                        //if (seleccionCuenta>=1 && seleccionCuenta<=banco.buscarCliente(userId).listSize()){
+                            if(banco.buscarCliente(userId).buscarCuenta(nroCuenta).depositar(montoDepositar)==true){
+                            mostrarMensaje("Se realizo el deposito con exito.",userId);
+                            mostrarMensaje(menuPrincipal,userId);
+                            estadoUsuario.put(userId,5);
+                        }
+                            else{
+                                Cuenta c = banco.buscarCliente(userId).buscarCuenta(nroCuenta);
+                                mostrarMensaje(mensajeError, userId);
+                                mostrarMensaje("Introduzca el monto que desea depositar en "+c.getMoneda(),userId);
+                                estadoUsuario.put(userId,13);
+                            }
+                        }
+                        //else{
+                          //  mostrarMensaje("No se pudo realizar el deposito", userId);
+                            //estadoUsuario.put(userId,3);
+                        //}
+                    //}
+                    catch(Exception ex){
+                        mostrarMensaje("Ocurrio una excepcion", userId);
+                        estadoUsuario.put(userId,3);
+                    }
+                     break;
+                     
                 default:
                     mostrarMensaje(mensajeError, userId);
-                    estadoUsuario.put(userId,1);
+                    estadoUsuario.put(userId,3);
                     break;
             }
             

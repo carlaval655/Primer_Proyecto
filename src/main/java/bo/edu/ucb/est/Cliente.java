@@ -34,7 +34,6 @@ public class Cliente {
     public void setNombre(String nombre) {
         this.nombre = nombre;
     }
-
     public String getIdCliente() {
         return idCliente;
     }
@@ -54,11 +53,29 @@ public class Cliente {
     public List<Cuenta> getCuentas() {
         return cuentas;
     }
-
+    public int listSize(){
+        return this.cuentas.size();
+    }
+    public String mostrarCuentas(){
+        String cad = "Seleccione una cuenta:\n";
+        for (int i = 0; i<getCuentas().size(); i++){
+            cad = cad + (i+1) +". " + (getCuentas().get(i).getNroCuenta()) + "\n";
+        }
+        return cad;
+    }
     public void setCuentas(List<Cuenta> cuentas) {
         this.cuentas = cuentas;
     }
-    
+    public Cuenta buscarCuenta(String numCuenta){
+        Cuenta c = null;
+        for(int i=0; i<getCuentas().size(); i++){
+            if (getCuentas().get(i).getNroCuenta().equals(numCuenta)){
+                c=getCuentas().get(i);
+                break;
+            }
+        }
+        return c;
+    }
     
     
 }

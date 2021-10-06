@@ -63,6 +63,8 @@ public class Cuenta {
     public void setSaldo(double saldo) {
         this.saldo = saldo;
     }
-    
+    public String mostrarInfoCuenta(){
+        return "Informacion de la cuenta:\n"+"Numero de cuenta: "+getNroCuenta()+"\nTipo de Cuenta: "+getTipo()+"\nSaldo Actual: "+getSaldo();
+    }
     
 }
