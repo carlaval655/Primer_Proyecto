@@ -47,17 +47,17 @@ public class bot_Cajero extends TelegramLongPollingBot{
         int seleccionCuenta=0;
         if(update.hasMessage()) {
             String noCliente1 = "Bienvenido al banco "+banco.getNombre();
-            String noCliente2 = "He notado que aun no eres cliente.";
+            String noCliente2 = "He notado que aún no eres cliente.";
             String pedirNombre = "¿Cuál es tu nombre completo?";
-            String pedirPin = "Por favor elige un PIN de seguridad, este te sera requerido cada que ingreses al sistema.";
+            String pedirPin = "Por favor elige un PIN de seguridad, este te será requerido cada vez que ingreses al sistema.";
             String registroCorrecto = "Te hemos registrado correctamente";
             String bienvenida = "Hola de nuevo ";
             String pedirPinIngreso = "Solo por seguridad ¿Cuál es tu PIN?";
-            String pinIncorrecto = "Lo siento, el codigo es incorrecto.";
-            String menuPrincipal = "Elige una opcion:\n1. Ver saldo\n2. Retirar dinero\n3. Depositar dinero\n"
+            String pinIncorrecto = "Lo siento, el código es incorrecto.";
+            String menuPrincipal = "Elige una opción:\n1. Ver saldo\n2. Retirar dinero\n3. Depositar dinero\n"
                     + "4. Crear cuenta\n5. Salir";
             String sinCuenta = "Usted no tiene cuentas, cree una primero";
-            String seleccionMoneda = "Seleccione la moneda:\n\t1. Dolares\n\t2. Bolivianos";
+            String seleccionMoneda = "Seleccione la moneda:\n\t1. Dólares\n\t2. Bolivianos";
             String seleccionTipoCuenta = "Seleccione el tipo de cuenta:\n\t1. Caja de Ahorros\n\t2. Cuenta corriente";
             String creacionCuenta = "Se le ha creado una ";
             String mensajeError = "Hubo un error.";
@@ -144,14 +144,17 @@ public class bot_Cajero extends TelegramLongPollingBot{
                             if (opcion==1 || opcion ==2 || opcion==3 || opcion==5){
                                 if(opcion==1 || opcion ==2 || opcion==3){
                             mostrarMensaje(sinCuenta,userId);
-                            mostrarMensaje(bienvenida+banco.buscarCliente(userId).getNombre(), userId);
-                            mostrarMensaje(pedirPinIngreso,userId);
-                            estadoUsuario.put(userId,4);
+                            //mostrarMensaje(mensajeError, userId);
+                        mostrarMensaje("Bienvenido",userId);
+                        mostrarMensaje(menuPrincipal,userId);
+                        estadoUsuario.put(userId,5);
                                 }
                                 else{
                                     mostrarMensaje(bienvenida+banco.buscarCliente(userId).getNombre(), userId);
                                     mostrarMensaje(pedirPinIngreso,userId);
                                     estadoUsuario.put(userId,4);
+                                    //mostrarMensaje("Si deseas volver a interactuar con el cajero solamente envia un mensaje",userId);
+                                    //estadoUsuario.put(userId,3);
                                 }
                         }
                         else {
@@ -189,8 +192,10 @@ public class bot_Cajero extends TelegramLongPollingBot{
                                     estadoUsuario.put(userId,4);
                                 break;
                             default:
-                                mostrarMensaje(mensajeError,userId);
-                                estadoUsuario.put(userId,3);
+                                mostrarMensaje(mensajeError, userId);
+                        mostrarMensaje("Bienvenido",userId);
+                        mostrarMensaje(menuPrincipal,userId);
+                        estadoUsuario.put(userId,5);
                                 break;
                         }
                         //mostrarMensaje(banco.buscarCliente(userId).mostrarCuentas(),userId);
@@ -209,7 +214,7 @@ public class bot_Cajero extends TelegramLongPollingBot{
                         int opcion = Integer.parseInt(mensajeUsuario);
                         if (opcion ==1 || opcion==2){
                             if (opcion == 1){
-                                clienteCuentaActual.get(userId).setMoneda("Dolares");
+                                clienteCuentaActual.get(userId).setMoneda("Dólares");
                                 mostrarMensaje(seleccionTipoCuenta,userId);
                                 estadoUsuario.put(userId,7);
                             }
@@ -246,8 +251,11 @@ public class bot_Cajero extends TelegramLongPollingBot{
                                 cuenta.setTipo("Cuenta Corriente");
                             }
                             banco.buscarCliente(userId).agregarCuenta(clienteCuentaActual.get(userId));
-                            mostrarMensaje(creacionCuenta+cuenta.getTipo()+" en "+cuenta.getMoneda()+" con saldo cero, cuyo numero de cuenta es "+cuenta.getNroCuenta(),userId);
-                            estadoUsuario.put(userId,3);
+                            mostrarMensaje(creacionCuenta+cuenta.getTipo()+" en "+cuenta.getMoneda()+" con saldo cero, cuyo número de cuenta es "+cuenta.getNroCuenta(),userId);
+                            
+                        mostrarMensaje("Bienvenido",userId);
+                        mostrarMensaje(menuPrincipal,userId);
+                        estadoUsuario.put(userId,5);
                         }
                         else {
                             mostrarMensaje(mensajeError, userId);
@@ -315,7 +323,9 @@ public class bot_Cajero extends TelegramLongPollingBot{
                         }
                         else{
                             mostrarMensaje(mensajeError, userId);
-                            estadoUsuario.put(userId,3);
+                            mostrarMensaje("Bienvenido",userId);
+                            mostrarMensaje(menuPrincipal,userId);
+                            estadoUsuario.put(userId,5);
                         }
                     }
                     catch(Exception ex){
@@ -339,7 +349,9 @@ public class bot_Cajero extends TelegramLongPollingBot{
                         }
                         else{
                             mostrarMensaje(mensajeError, userId);
-                            estadoUsuario.put(userId,3);
+                            mostrarMensaje("Bienvenido",userId);
+                            mostrarMensaje(menuPrincipal,userId);
+                            estadoUsuario.put(userId,5);
                         }
                     }
                     catch(Exception ex){
@@ -363,8 +375,10 @@ public class bot_Cajero extends TelegramLongPollingBot{
                             estadoUsuario.put(userId,13);
                         }
                         else{
-                            mostrarMensaje(mensajeError+"---", userId);
-                            estadoUsuario.put(userId,3);
+                            mostrarMensaje(mensajeError, userId);
+                            mostrarMensaje("Bienvenido",userId);
+                            mostrarMensaje(menuPrincipal,userId);
+                            estadoUsuario.put(userId,5);
                         }
                     }
                     catch(Exception ex){
@@ -376,13 +390,19 @@ public class bot_Cajero extends TelegramLongPollingBot{
                      break; 
                      case 12://Se debe validar el monto de retiro que el cliente ingreso
                      mensajeUsuario = update.getMessage().getText();
+                     try {
                      double montoRetirar= Double.parseDouble(mensajeUsuario);
                      String nroCuentaActual = clienteCuentaActual.get(userId).getNroCuenta();
-                  
-                     try {
+                     if(montoRetirar==0){
+                         mostrarMensaje("El monto a retirar no puede ser 0.",userId);
+                         mostrarMensaje(menuPrincipal,userId);
+                            estadoUsuario.put(userId,5);
+                     }
+                             
+                     else{
                         //if (seleccionCuenta>=1 && seleccionCuenta<=banco.buscarCliente(userId).listSize()){
                             if(banco.buscarCliente(userId).buscarCuenta(nroCuentaActual).retirar(montoRetirar)==true){
-                            mostrarMensaje("Se realizo el retiro con exito.",userId);
+                            mostrarMensaje("Se realizó el retiro con exito.",userId);
                             mostrarMensaje(menuPrincipal,userId);
                             estadoUsuario.put(userId,5);
                         }
@@ -390,27 +410,31 @@ public class bot_Cajero extends TelegramLongPollingBot{
                                 Cuenta c = banco.buscarCliente(userId).buscarCuenta(nroCuentaActual);
                                 mostrarMensaje(mensajeError, userId);
                                 mostrarMensaje("Introduzca el monto que desea retirar en "+c.getMoneda(),userId);
-                                estadoUsuario.put(userId,13);
+                                estadoUsuario.put(userId,12);
                             }
                         }
+                     }
                         //else{
                           //  mostrarMensaje("No se pudo realizar el deposito", userId);
                             //estadoUsuario.put(userId,3);
                         //}
                     //}
                     catch(Exception ex){
-                        mostrarMensaje("Ocurrio una excepcion", userId);
-                        estadoUsuario.put(userId,3);
+                        mostrarMensaje(mensajeError, userId);
+                            mostrarMensaje("Bienvenido",userId);
+                            mostrarMensaje(menuPrincipal,userId);
+                            estadoUsuario.put(userId,5);
                     }
                      break;
                      case 13://Se debe validar el monto que el cliente desea depositar
                      mensajeUsuario = update.getMessage().getText();
+                     try {
                      double montoDepositar= Double.parseDouble(mensajeUsuario);
                      String nroCuenta = clienteCuentaActual.get(userId).getNroCuenta();
-                     try {
+                     
                         //if (seleccionCuenta>=1 && seleccionCuenta<=banco.buscarCliente(userId).listSize()){
                             if(banco.buscarCliente(userId).buscarCuenta(nroCuenta).depositar(montoDepositar)==true){
-                            mostrarMensaje("Se realizo el deposito con exito.",userId);
+                            mostrarMensaje("Se realizó el deposito con exito.",userId);
                             mostrarMensaje(menuPrincipal,userId);
                             estadoUsuario.put(userId,5);
                         }
@@ -427,14 +451,18 @@ public class bot_Cajero extends TelegramLongPollingBot{
                         //}
                     //}
                     catch(Exception ex){
-                        mostrarMensaje("Ocurrio una excepcion", userId);
-                        estadoUsuario.put(userId,3);
+                        mostrarMensaje(mensajeError, userId);
+                            mostrarMensaje("Bienvenido",userId);
+                            mostrarMensaje(menuPrincipal,userId);
+                            estadoUsuario.put(userId,5);
                     }
                      break;
                      
                 default:
                     mostrarMensaje(mensajeError, userId);
-                    estadoUsuario.put(userId,3);
+                            mostrarMensaje("Bienvenido",userId);
+                            mostrarMensaje(menuPrincipal,userId);
+                            estadoUsuario.put(userId,5);
                     break;
             }
             
