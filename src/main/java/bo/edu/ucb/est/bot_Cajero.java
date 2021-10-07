@@ -86,18 +86,29 @@ public class bot_Cajero extends TelegramLongPollingBot{
                      mensajeUsuario = update.getMessage().getText();
                      try {
                         int pin = Integer.parseInt(mensajeUsuario);
-                        if (pin>=1000 || pin<=10000){
+                        if (mensajeUsuario.length()==4){
                         for (int i = 0; i<banco.getClientes().size(); i++){
                             if(banco.getClientes().get(i).getIdCliente().equals(userId)){
                                 banco.getClientes().get(i).setPinSeguridad(mensajeUsuario);
                                 mostrarMensaje(registroCorrecto,userId);
                                 break;
                             } 
+                            else{
+                                mostrarMensaje("El pin debe contener 4 dígitos",userId);
+                                mostrarMensaje(pedirPin, userId);
+                                estadoUsuario.put(userId,2);
+                            }
                         }
                         estadoUsuario.put(userId,3);
                         }
+                        else{
+                            mostrarMensaje("El pin debe contener 4 dígitos",userId);
+                        mostrarMensaje(pedirPin, userId);
+                        estadoUsuario.put(userId,2);
+                        }
                     }
                     catch(Exception ex){
+                        mostrarMensaje("El pin debe contener 4 dígitos",userId);
                         mostrarMensaje(pedirPin, userId);
                         estadoUsuario.put(userId,2);
                     }
@@ -370,7 +381,7 @@ public class bot_Cajero extends TelegramLongPollingBot{
                             Cuenta cuentaDeposito = banco.buscarCliente(userId).getCuentas().get(seleccionCuenta-1);
                             //System.out.println("cuenta deposito"+cuentaDeposito.mostrarInfoCuenta());
                             clienteCuentaActual.put(userId, cuentaDeposito);
-                            mostrarMensaje(cuentaDeposito.mostrarInfoCuenta(),userId);
+                            mostrarMensaje("El saldo en esta cuenta es de "+cuentaDeposito.getSaldo()+" "+cuentaDeposito.getMoneda(),userId);
                             mostrarMensaje("Introduzca el monto que desea depositar en "+cuentaDeposito.getMoneda(),userId);
                             estadoUsuario.put(userId,13);
                         }
@@ -409,6 +420,7 @@ public class bot_Cajero extends TelegramLongPollingBot{
                             else{
                                 Cuenta c = banco.buscarCliente(userId).buscarCuenta(nroCuentaActual);
                                 mostrarMensaje(mensajeError, userId);
+                                mostrarMensaje("El monto a retirar no puede ser mayor al saldo de la cuenta que es de "+c.getSaldo()+" "+c.getMoneda()+" y debe ser positivo",userId);
                                 mostrarMensaje("Introduzca el monto que desea retirar en "+c.getMoneda(),userId);
                                 estadoUsuario.put(userId,12);
                             }
@@ -441,6 +453,7 @@ public class bot_Cajero extends TelegramLongPollingBot{
                             else{
                                 Cuenta c = banco.buscarCliente(userId).buscarCuenta(nroCuenta);
                                 mostrarMensaje(mensajeError, userId);
+                                //mostrarMensaje("El saldo en esta cuenta es de "+c.getSaldo()+" "+c.getMoneda(),userId);
                                 mostrarMensaje("Introduzca el monto que desea depositar en "+c.getMoneda(),userId);
                                 estadoUsuario.put(userId,13);
                             }
